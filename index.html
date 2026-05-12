@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="BrawlMeta"/>
+<title>BrawlMeta</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0d0f1a;
+  --surface: #13162a;
+  --surface2: #1a1f38;
+  --surface3: #222844;
+  --border: #2a3158;
+  --text: #eef0ff;
+  --text-2: #8890b8;
+  --text-3: #404870;
+  --gold: #ffd84d;
+  --gold-lo: rgba(255,216,77,0.12);
+  --blue: #4d9fff;
+  --blue-lo: rgba(77,159,255,0.12);
+  --green: #4dffaa;
+  --green-lo: rgba(77,255,170,0.10);
+  --red: #ff5c5c;
+  --red-lo: rgba(255,92,92,0.10);
+  --purple: #c97bff;
+  --purple-lo: rgba(201,123,255,0.10);
+  --orange: #ff8c42;
+  --safe-t: env(safe-area-inset-top,0px);
+  --safe-b: env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--text);font-family:'Nunito Sans',sans-serif;height:100%;overflow:hidden;-webkit-font-smoothing:antialiased}
+#app{display:flex;flex-direction:column;height:100dvh;max-width:430px;margin:0 auto;overflow:hidden}
+#app::before{
+  content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse at 20% 10%,rgba(77,159,255,0.06) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 80%,rgba(201,123,255,0.05) 0%,transparent 60%);
+  pointer-events:none;z-index:0;
+}
+
+/* HEADER */
+header{
+  padding:calc(var(--safe-t) + 12px) 20px 12px;
+  display:flex;flex-direction:column;gap:6px;
+  flex-shrink:0;position:relative;z-index:1;
+  border-bottom:1px solid var(--border);
+  background:rgba(13,15,26,0.92);
+  backdrop-filter:blur(12px);
+}
+.header-credit{font-size:9px;font-weight:600;color:var(--text-3);letter-spacing:0.1em;text-transform:uppercase}
+.header-main{display:flex;align-items:center;justify-content:space-between}
+.header-title{
+  font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;
+  background:linear-gradient(135deg,#ffd84d,#ff8c42);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:-0.02em;
+}
+.season-badge{
+  background:var(--gold-lo);border:1px solid rgba(255,216,77,0.25);
+  border-radius:20px;padding:5px 12px;
+  font-size:11px;font-weight:700;color:var(--gold);letter-spacing:0.04em;
+}
+.meta-alert{
+  background:rgba(255,92,92,0.08);border:1px solid rgba(255,92,92,0.2);
+  border-radius:8px;padding:6px 10px;
+  font-size:10px;font-weight:700;color:var(--red);
+  display:flex;align-items:center;gap:6px;
+}
+
+/* NAV */
+nav{display:flex;padding:10px 16px;gap:6px;flex-shrink:0;position:relative;z-index:1;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{
+  flex-shrink:0;padding:8px 14px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:20px;color:var(--text-2);
+  font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;
+  letter-spacing:0.03em;cursor:pointer;transition:all 0.18s;white-space:nowrap;
+}
+nav button.active{background:var(--gold-lo);border-color:rgba(255,216,77,0.3);color:var(--gold)}
+
+/* VIEWS */
+.view{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 16px calc(20px + var(--safe-b));display:none;position:relative;z-index:1}
+.view.active{display:block}
+.view::-webkit-scrollbar{width:0}
+
+.sec-title{
+  font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;
+  letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);
+  margin:14px 2px 7px;
+}
+
+/* MODE PILLS */
+.mode-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.mode-pill{
+  padding:7px 13px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:20px;font-family:'Nunito',sans-serif;font-size:11px;
+  font-weight:700;color:var(--text-2);cursor:pointer;transition:all 0.18s;
+}
+.mode-pill.active{background:var(--blue-lo);border-color:rgba(77,159,255,0.3);color:var(--blue)}
+
+/* TIER LIST */
+.tier-row{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:12px;margin-bottom:8px;
+  display:flex;align-items:flex-start;gap:10px;
+}
+.tier-label{
+  width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Nunito',sans-serif;font-size:18px;font-weight:900;
+  flex-shrink:0;margin-top:1px;
+}
+.tier-label.S{background:linear-gradient(135deg,#ffd84d,#ff8c42);color:#000}
+.tier-label.A{background:linear-gradient(135deg,#4dffaa,#4d9fff);color:#000}
+.tier-label.B{background:var(--blue-lo);color:var(--blue);border:1px solid rgba(77,159,255,0.2)}
+.tier-label.C{background:var(--surface2);color:var(--text-2);border:1px solid var(--border)}
+.tier-brawlers{display:flex;flex-wrap:wrap;gap:5px;flex:1}
+.brawler-chip{
+  display:flex;align-items:center;gap:5px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;padding:5px 9px;
+  font-size:12px;font-weight:700;color:var(--text);cursor:pointer;
+  transition:all 0.15s;
+}
+.brawler-chip.broken{border-color:rgba(255,92,92,0.35);background:rgba(255,92,92,0.07)}
+.brawler-chip.broken span.name{color:var(--red)}
+.brawler-chip:active{background:var(--surface3)}
+.b-emoji{font-size:15px}
+
+/* BRAWLER CARDS */
+.brawler-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:14px;margin-bottom:8px;
+  display:flex;align-items:center;gap:12px;
+}
+.brawler-avatar{
+  width:52px;height:52px;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;flex-shrink:0;background:var(--surface2);border:1px solid var(--border);
+}
+.brawler-info{flex:1;min-width:0}
+.brawler-name{font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;color:var(--text);margin-bottom:1px}
+.brawler-role{font-size:10px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:6px}
+.brawler-role.tank{color:var(--red)}
+.brawler-role.assassin{color:var(--purple)}
+.brawler-role.support{color:var(--green)}
+.brawler-role.fighter{color:var(--orange)}
+.brawler-role.marksman{color:var(--blue)}
+.brawler-role.controller{color:var(--gold)}
+.stat-bars{display:flex;flex-direction:column;gap:4px}
+.stat-bar-row{display:flex;align-items:center;gap:8px}
+.stat-bar-label{font-size:9px;color:var(--text-2);font-weight:600;width:44px;flex-shrink:0}
+.stat-bar-track{flex:1;height:4px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:3px}
+.stat-bar-fill.dmg{background:linear-gradient(90deg,#ff5c5c,#ff8c42)}
+.stat-bar-fill.speed{background:linear-gradient(90deg,#4d9fff,#4dffaa)}
+.stat-bar-fill.range{background:linear-gradient(90deg,#c97bff,#4d9fff)}
+.tier-badge-sm{
+  padding:4px 10px;border-radius:6px;
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:900;
+  flex-shrink:0;align-self:flex-start;
+}
+.tier-badge-sm.S{background:linear-gradient(135deg,#ffd84d,#ff8c42);color:#000}
+.tier-badge-sm.A{background:linear-gradient(135deg,#4dffaa,#4d9fff);color:#000}
+.tier-badge-sm.B{background:var(--blue-lo);color:var(--blue);border:1px solid rgba(77,159,255,0.2)}
+.tier-badge-sm.C{background:var(--surface2);color:var(--text-2)}
+.nerf-tag{
+  display:inline-block;margin-top:3px;
+  background:var(--red-lo);border:1px solid rgba(255,92,92,0.2);
+  border-radius:4px;padding:1px 6px;
+  font-size:9px;font-weight:700;color:var(--red);letter-spacing:0.05em;
+}
+.buff-tag{
+  display:inline-block;margin-top:3px;
+  background:var(--green-lo);border:1px solid rgba(77,255,170,0.2);
+  border-radius:4px;padding:1px 6px;
+  font-size:9px;font-weight:700;color:var(--green);letter-spacing:0.05em;
+}
+.new-tag{
+  display:inline-block;margin-top:3px;margin-left:4px;
+  background:var(--gold-lo);border:1px solid rgba(255,216,77,0.25);
+  border-radius:4px;padding:1px 6px;
+  font-size:9px;font-weight:700;color:var(--gold);letter-spacing:0.05em;
+}
+
+/* COMBOS */
+.combo-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:14px;margin-bottom:10px;
+}
+.combo-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.combo-title{font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;color:var(--text)}
+.combo-win{
+  background:var(--green-lo);border:1px solid rgba(77,255,170,0.2);
+  border-radius:8px;padding:3px 10px;
+  font-size:11px;font-weight:800;color:var(--green);font-family:'Nunito',sans-serif;
+}
+.combo-brawlers{display:flex;gap:6px;margin-bottom:10px}
+.combo-brawler{
+  flex:1;background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:10px 6px;text-align:center;
+}
+.cb-emoji{font-size:26px;display:block;margin-bottom:3px}
+.cb-name{font-size:10px;font-weight:700;color:var(--text-2)}
+.combo-desc{font-size:12px;color:var(--text-2);line-height:1.55}
+.combo-modes{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.mode-tag{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:5px;padding:2px 8px;
+  font-size:10px;font-weight:700;color:var(--text-2);
+}
+.damian-warning{
+  background:rgba(255,92,92,0.08);border:1px solid rgba(255,92,92,0.2);
+  border-radius:8px;padding:8px 10px;margin-top:8px;
+  font-size:11px;color:var(--red);font-weight:700;
+}
+
+/* TIPS */
+.tip-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:13px;padding:13px 14px;margin-bottom:7px;
+  display:flex;gap:11px;align-items:flex-start;
+}
+.tip-icon{
+  width:34px;height:34px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;flex-shrink:0;
+}
+.tip-icon.gold{background:var(--gold-lo)}
+.tip-icon.blue{background:var(--blue-lo)}
+.tip-icon.green{background:var(--green-lo)}
+.tip-icon.red{background:var(--red-lo)}
+.tip-icon.purple{background:var(--purple-lo)}
+.tip-title{font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;color:var(--text);margin-bottom:3px}
+.tip-text{font-size:12px;color:var(--text-2);line-height:1.55}
+
+/* TOAST */
+#toast{
+  position:fixed;bottom:calc(24px + var(--safe-b));left:50%;
+  transform:translateX(-50%) translateY(10px);
+  background:var(--surface3);border:1px solid var(--border);
+  border-radius:20px;padding:9px 18px;
+  font-size:13px;font-weight:700;color:var(--text);
+  opacity:0;transition:all 0.2s;pointer-events:none;z-index:999;white-space:nowrap;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div id="app">
+
+<header>
+  <div class="header-credit">developed by Nico Kaizo · nicoklein</div>
+  <div class="header-main">
+    <div class="header-title">⚡ BrawlMeta</div>
+    <div class="season-badge">Mai 2026</div>
+  </div>
+  <div class="meta-alert">🔥 Update 67 · Patch 28. April · Damian genervt aber noch broken</div>
+</header>
+
+<nav>
+  <button class="active" onclick="showView('tierlist',this)">🏆 Tier List</button>
+  <button onclick="showView('brawlers',this)">🥊 Brawler</button>
+  <button onclick="showView('combos',this)">🔥 Trio Combos</button>
+  <button onclick="showView('tips',this)">💡 Tipps</button>
+</nav>
+
+<!-- TIER LIST -->
+<div class="view active" id="view-tierlist">
+  <div class="mode-pills">
+    <div class="mode-pill active" onclick="setMode('all',this)">Alle</div>
+    <div class="mode-pill" onclick="setMode('gemgrab',this)">💎 Gem Grab</div>
+    <div class="mode-pill" onclick="setMode('brawlball',this)">⚽ Brawl Ball</div>
+    <div class="mode-pill" onclick="setMode('showdown',this)">☠️ Showdown</div>
+    <div class="mode-pill" onclick="setMode('heist',this)">🏦 Heist</div>
+    <div class="mode-pill" onclick="setMode('knockout',this)">💀 Knockout</div>
+  </div>
+
+  <div class="sec-title">S Tier — Broken 🔥</div>
+  <div class="tier-row"><div class="tier-label S">S</div><div class="tier-brawlers" id="tier-s"></div></div>
+
+  <div class="sec-title">A Tier — Top Pick</div>
+  <div class="tier-row"><div class="tier-label A">A</div><div class="tier-brawlers" id="tier-a"></div></div>
+
+  <div class="sec-title">B Tier — Solid</div>
+  <div class="tier-row"><div class="tier-label B">B</div><div class="tier-brawlers" id="tier-b"></div></div>
+
+  <div class="sec-title">C Tier — Situational</div>
+  <div class="tier-row"><div class="tier-label C">C</div><div class="tier-brawlers" id="tier-c"></div></div>
+</div>
+
+<!-- BRAWLER -->
+<div class="view" id="view-brawlers">
+  <div class="sec-title">Meta Brawler — Mai 2026</div>
+  <div id="brawler-list"></div>
+</div>
+
+<!-- COMBOS -->
+<div class="view" id="view-combos">
+  <div class="sec-title">🔥 Top Trio Combos Mai 2026</div>
+  <div id="combo-list"></div>
+</div>
+
+<!-- TIPS -->
+<div class="view" id="view-tips">
+  <div class="sec-title">💡 Trophäen grinden — Mai 2026</div>
+  <div id="tips-list"></div>
+</div>
+
+</div>
+<div id="toast"></div>
+
+<script>
+const BRAWLERS = [
+  // S TIER
+  { name:'Damian',  emoji:'😤', role:'fighter',    tier:'S', dmg:95, speed:82, range:60, tag:'new',  note:'71% WR – selbst genervt noch #1 Pick/Ban' },
+  { name:'Colette', emoji:'💜', role:'marksman',   tier:'S', dmg:85, speed:72, range:78, tag:'',     note:'Konter für Tanks, mega stark in diesem Meta' },
+  { name:'Bibi',    emoji:'🏏', role:'fighter',    tier:'S', dmg:88, speed:85, range:55, tag:'buff', note:'Aggro + Mobility, dominiert engen Raum' },
+  { name:'Crow',    emoji:'🐦', role:'assassin',   tier:'S', dmg:78, speed:88, range:80, tag:'',     note:'Poison bremst Tanks, Healing Reduction OP' },
+  { name:'Najia',   emoji:'🗡️', role:'assassin',   tier:'S', dmg:80, speed:90, range:55, tag:'buff', note:'Rework hat sie auf S gebracht' },
+  { name:'Chester', emoji:'🎪', role:'fighter',    tier:'S', dmg:90, speed:75, range:65, tag:'',     note:'Unpredictable Super Rotation, hohe Burst' },
+  { name:'Lumi',    emoji:'✨', role:'support',    tier:'S', dmg:72, speed:78, range:75, tag:'buff', note:'April Buff – 68%+ WR' },
+  // A TIER
+  { name:'Mortis',  emoji:'🦇', role:'assassin',   tier:'A', dmg:82, speed:92, range:45, tag:'',     note:'Combo Spinner Gadget macht ihn in Heist gefährlich' },
+  { name:'Leon',    emoji:'🦁', role:'assassin',   tier:'A', dmg:80, speed:85, range:68, tag:'buff', note:'Buffies haben ihn zurückgebracht' },
+  { name:'Colt',    emoji:'🤠', role:'marksman',   tier:'A', dmg:86, speed:70, range:90, tag:'',     note:'Top DPS wenn du aimen kannst' },
+  { name:'Spike',   emoji:'🌵', role:'marksman',   tier:'A', dmg:82, speed:68, range:85, tag:'',     note:'Area Control + Anti-Tank, immer safe' },
+  { name:'Darryl',  emoji:'🤖', role:'tank',       tier:'A', dmg:84, speed:70, range:50, tag:'buff', note:'April Buff – Barrel Roll jetzt tödlicher' },
+  { name:'Ash',     emoji:'🗑️', role:'tank',       tier:'A', dmg:86, speed:68, range:48, tag:'buff', note:'68% WR nach Buff, hält extrem viel aus' },
+  { name:'Bo',      emoji:'🏹', role:'marksman',   tier:'A', dmg:76, speed:68, range:82, tag:'buff', note:'Buffies haben ihn zurück – free Elo gerade' },
+  { name:'Otis',    emoji:'🎨', role:'controller', tier:'A', dmg:74, speed:72, range:80, tag:'',     note:'Silence ist brutal vs. Super-abhängige Brawler' },
+  { name:'Pierce',  emoji:'🎓', role:'fighter',    tier:'A', dmg:80, speed:70, range:72, tag:'',     note:'Solid Allrounder, guter Damage' },
+  // B TIER
+  { name:'Sirius',  emoji:'⭐', role:'controller', tier:'B', dmg:78, speed:74, range:76, tag:'nerf', note:'Von S auf B gefallen – auf offenen Maps noch ok' },
+  { name:'Mandy',   emoji:'🍭', role:'marksman',   tier:'B', dmg:92, speed:62, range:98, tag:'',     note:'Extreme Range auf offenen Maps stark' },
+  { name:'Edgar',   emoji:'😈', role:'assassin',   tier:'B', dmg:82, speed:90, range:35, tag:'',     note:'Sehr Map-abhängig, aber in Heist/Bounty gut' },
+  { name:'Emz',     emoji:'💅', role:'controller', tier:'B', dmg:68, speed:65, range:78, tag:'',     note:'Zone Control, Top 10 Pick Rate aktuell' },
+  { name:'Sandy',   emoji:'😴', role:'support',    tier:'B', dmg:65, speed:70, range:72, tag:'',     note:'Invisibility Super immer nützlich' },
+  { name:'Max',     emoji:'🏃', role:'support',    tier:'B', dmg:68, speed:95, range:65, tag:'',     note:'Speed Boost für aggressive Trios' },
+  // C TIER
+  { name:'Kenji',   emoji:'⚔️', role:'assassin',   tier:'C', dmg:78, speed:80, range:55, tag:'',     note:'Sieht gut aus – spielt sich wie wet noodle in Ranked' },
+  { name:'Clancy',  emoji:'🎖️', role:'fighter',    tier:'C', dmg:72, speed:68, range:58, tag:'nerf', note:'Rework hat nix gebracht – meid ihn in Ranked' },
+  { name:'Pam',     emoji:'🔧', role:'support',    tier:'C', dmg:70, speed:65, range:70, tag:'',     note:'Heal ist gut aber zu langsam für aktuelles Meta' },
+];
+
+const COMBOS = [
+  {
+    title:'Damian Dive Comp',
+    brawlers:['Damian','Lumi','Crow'],
+    emojis:['😤','✨','🐦'],
+    winrate:'74%',
+    desc:'Damian dived rein, Lumi healt ihn durch, Crow vergiftet alles was entkommen will. Gegen dieses Trio gibt\'s kaum ein Counter aktuell.',
+    modes:['Gem Grab','Brawl Ball','Knockout'],
+    warning:'Ja das ist das Trio das alle nerved lol – wenn du\'s nicht counterst, spiel es selbst'
+  },
+  {
+    title:'Tank Buster',
+    brawlers:['Colette','Otis','Spike'],
+    emojis:['💜','🎨','🌵'],
+    winrate:'70%',
+    desc:'Colette macht % Schaden auf hohe HP, Otis silenced die Super, Spike kontrolliert die Zone. Perfekter Counter gegen Damian und Ash Comps.',
+    modes:['Gem Grab','Hot Zone','Knockout'],
+    warning:''
+  },
+  {
+    title:'Aggro Assassin Rush',
+    brawlers:['Bibi','Mortis','Crow'],
+    emojis:['🏏','🦇','🐦'],
+    winrate:'68%',
+    desc:'Bibi pusht rein, Mortis finisht geschwächte Gegner, Crow reduziert Healing. Sehr aggro, sehr schnell. Funktioniert am besten wenn ihr koordiniert spielt.',
+    modes:['Brawl Ball','Showdown','Knockout'],
+    warning:''
+  },
+  {
+    title:'Heist Speedrun 2026',
+    brawlers:['Darryl','Ash','Colt'],
+    emojis:['🤖','🗑️','🤠'],
+    winrate:'72%',
+    desc:'Darryl und Ash tanken sich durch, Colt zerstört den Safe von hinten. Nach den Buffs sind Darryl und Ash so tanky dass kaum jemand sie aufhalten kann.',
+    modes:['Heist'],
+    warning:''
+  },
+  {
+    title:'Free Elo Trio',
+    brawlers:['Bo','Leon','Sandy'],
+    emojis:['🏹','🦁','😴'],
+    winrate:'65%',
+    desc:'Bo legt Minen, Leon invisible finish, Sandy gibt Team Invisibility mit Super. Sehr solid und einfach zu spielen. Casual-freundlichste S/A Combo gerade.',
+    modes:['Showdown','Gem Grab'],
+    warning:''
+  },
+];
+
+const TIPS = [
+  { icon:'😤', color:'red',    title:'Damian Ban > Alles andere', text:'In Ranked wenn du bannen kannst – Damian ban. Selbst nach dem Nerf vom 28. April hat er 71% WR. Seine Super kommt zu schnell und der Schaden ist noch immer absurd.' },
+  { icon:'💜', color:'purple', title:'Colette = Damian Counter', text:'Wenn Gegner Damian spielt und du ihn nicht gebannt hast, Colette rein. Ihr %-Schaden macht Damians hohe HP zum Nachteil. Ist im Moment der beste Hard-Counter.' },
+  { icon:'🏆', color:'gold',   title:'S/A Tier für Trophy Push', text:'Nur S oder A Tier spielen beim Trophäen grinden. Breite schlägt Tiefe – erst einen Brawler auf Max pushen, dann den nächsten.' },
+  { icon:'🗺️', color:'blue',   title:'Map lesen ist halber Win', text:'Offene Map = Mandy, Spike, Colt. Enge Gänge = Bibi, Darryl, Ash. 80% der Ranked Losses kommen von falschem Brawler zur Map.' },
+  { icon:'🔄', color:'green',  title:'Bo ist gerade underrated', text:'Buffies haben Bo zurückgebracht und die meisten wissen\'s noch nicht. Free Elo bevor der Rest es merkt. Minen + Range = starke Zone Control.' },
+  { icon:'⚡', color:'gold',   title:'Najia lernen lohnt sich', text:'Nach ihrem Rework ist Najia auf S-Tier. Sie macht weniger Schaden als vorher aber alles andere wurde besser. Früh investieren bevor sie genervt wird.' },
+  { icon:'📊', color:'red',    title:'Stop nach 3 Niederlagen', text:'Tilt ist real. Nach 3 Losses in Folge Pause machen. Frustriert spielst du messbar schlechter – besonders gegen Damian.' },
+];
+
+const MODE_TIERS = {
+  all:      { S:['Damian','Colette','Bibi','Crow','Najia','Chester','Lumi'], A:['Mortis','Leon','Colt','Spike','Darryl','Ash','Bo','Otis','Pierce'], B:['Sirius','Mandy','Edgar','Emz','Sandy','Max'], C:['Kenji','Clancy','Pam'] },
+  gemgrab:  { S:['Damian','Lumi','Colette'], A:['Otis','Spike','Sandy','Crow'], B:['Emz','Bo','Max','Chester'], C:['Pam','Sirius'] },
+  brawlball:{ S:['Bibi','Damian','Najia'], A:['Mortis','Max','Darryl'], B:['Leon','Edgar','Emz'], C:['Mandy','Pam'] },
+  showdown: { S:['Crow','Colette','Leon'], A:['Bo','Sandy','Najia'], B:['Edgar','Bibi','Chester'], C:['Clancy','Kenji'] },
+  heist:    { S:['Darryl','Ash','Colt'], A:['Damian','Mortis','Pierce'], B:['Mandy','Edgar','Bo'], C:['Pam','Sandy'] },
+  knockout: { S:['Colette','Spike','Otis'], A:['Chester','Crow','Lumi'], B:['Sirius','Mandy','Colt'], C:['Edgar','Pam'] },
+};
+
+const BROKEN = ['Damian'];
+
+function getBrawler(name){ return BRAWLERS.find(b=>b.name===name) }
+
+function renderTiers(mode){
+  const t = MODE_TIERS[mode];
+  ['S','A','B','C'].forEach(tier=>{
+    document.getElementById('tier-'+tier.toLowerCase()).innerHTML =
+      t[tier].map(name=>{
+        const b = getBrawler(name);
+        const broken = BROKEN.includes(name) ? ' broken' : '';
+        return `<div class="brawler-chip${broken}" onclick="toast('${name}: ${b?.note||''}')">
+          <span class="b-emoji">${b?.emoji||'⭐'}</span>
+          <span class="name">${name}</span>
+        </div>`;
+      }).join('');
+  });
+}
+
+function renderBrawlers(){
+  document.getElementById('brawler-list').innerHTML = BRAWLERS.map(b=>`
+    <div class="brawler-card">
+      <div class="brawler-avatar">${b.emoji}</div>
+      <div class="brawler-info">
+        <div class="brawler-name">${b.name}${b.tag==='new'?'<span class="new-tag">NEW</span>':''}</div>
+        <div class="brawler-role ${b.role}">${b.role.toUpperCase()}</div>
+        ${b.tag==='nerf'?'<span class="nerf-tag">↓ GENERVT</span>':''}
+        ${b.tag==='buff'?'<span class="buff-tag">↑ GEBUFFT</span>':''}
+        <div class="stat-bars" style="margin-top:6px">
+          <div class="stat-bar-row"><div class="stat-bar-label">DMG</div><div class="stat-bar-track"><div class="stat-bar-fill dmg" style="width:${b.dmg}%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label">Speed</div><div class="stat-bar-track"><div class="stat-bar-fill speed" style="width:${b.speed}%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label">Range</div><div class="stat-bar-track"><div class="stat-bar-fill range" style="width:${b.range}%"></div></div></div>
+        </div>
+      </div>
+      <div class="tier-badge-sm ${b.tier}">${b.tier}</div>
+    </div>
+  `).join('');
+}
+
+function renderCombos(){
+  document.getElementById('combo-list').innerHTML = COMBOS.map(c=>`
+    <div class="combo-card">
+      <div class="combo-header">
+        <div class="combo-title">${c.title}</div>
+        <div class="combo-win">⚡ ${c.winrate} WR</div>
+      </div>
+      <div class="combo-brawlers">
+        ${c.brawlers.map((name,i)=>`
+          <div class="combo-brawler">
+            <span class="cb-emoji">${c.emojis[i]}</span>
+            <div class="cb-name">${name}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="combo-desc">${c.desc}</div>
+      ${c.warning?`<div class="damian-warning">⚠️ ${c.warning}</div>`:''}
+      <div class="combo-modes">${c.modes.map(m=>`<div class="mode-tag">${m}</div>`).join('')}</div>
+    </div>
+  `).join('');
+}
+
+function renderTips(){
+  document.getElementById('tips-list').innerHTML = TIPS.map(t=>`
+    <div class="tip-card">
+      <div class="tip-icon ${t.color}">${t.icon}</div>
+      <div>
+        <div class="tip-title">${t.title}</div>
+        <div class="tip-text">${t.text}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showView(v,el){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  el.classList.add('active');
+}
+
+function setMode(mode,el){
+  document.querySelectorAll('.mode-pill').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  renderTiers(mode);
+}
+
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+renderTiers('all');
+renderBrawlers();
+renderCombos();
+renderTips();
+</script>
+</body>
+</html>
